@@ -1,6 +1,7 @@
 import React, { createContext, ReactNode, useContext, useEffect, useRef, useState } from 'react';
 
-const WS_URL = 'ws://<ESP32-IP>:<port>'; // Replace with your ESP32 IP and port
+// For development: Use a static WebSocket URL. Make this dynamic after development is complete.
+const WS_URL = 'ws://192.168.1.100:81'; // TODO: Replace with your ESP32 IP and port, or make dynamic for production
 
 interface IWebSocketContext {
   status: 'connecting' | 'connected' | 'disconnected';

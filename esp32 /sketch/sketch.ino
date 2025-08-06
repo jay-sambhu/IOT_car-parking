@@ -1,96 +1,119 @@
 #include <WiFi.h>
-#include <ESPAsyncWebServer.h>
-#include <SPI.h>
-#include <MFRC522.h>
-#include <Servo.h>
+#include <WebServer.h>
+#include <Wire.h>
+#include <LiquidCrystal_I2C.h>
 
-// Pin Config
-#define LDR1 34
-#define LDR2 35
-#define LDR3 32
-#define LDR4 33
-#define SERVO_PIN 18
-#define SS_PIN 5
-#define RST_PIN 4
+// WiFi credentials
+const char* ssid = "Pranjal_DHFiberNet"; // Your hotspot SSID
+const char* password = "DHFibernet@0331824"; // Password for the network
 
-// Objects
-MFRC522 mfrc522(SS_PIN, RST_PIN);
-Servo gateServo;
-AsyncWebServer server(80);
-AsyncWebSocket ws("/ws");
+// LCD setup
+LiquidCrystal_I2C lcd(0x27, 16, 2); // I2C address, 16 columns, 2 rows
 
-const char* ssid = "YourWiFi";
-const char* password = "YourPassword";
+// LDR analog pins
+const int ldr1DigitalPin = 34;
+const int ldr2DigitalPin = 32;
+const int ldr3DigitalPin = 33;
+const int ldr4DigitalPin = 25;
 
-bool slotAvailable() {
-  int threshold = 1000;  // adjust based on your LDR setup
-  return analogRead(LDR1) > threshold || analogRead(LDR2) > threshold ||
-         analogRead(LDR3) > threshold || analogRead(LDR4) > threshold;
-}
+// Threshold for determining HIGH/LOW
+const int threshold = 512;
 
-bool checkUID(MFRC522::Uid uid) {
-  byte allowed[4] = {0xDE, 0xAD, 0xBE, 0xEF};
-  for (byte i = 0; i < 4; i++) {
-    if (uid.uidByte[i] != allowed[i]) return false;
-  }
-  return true;
-}
-
-void openGate() {
-  gateServo.write(90);
-  delay(3000);
-  gateServo.write(0);
-}
-
-void sendSlotStatus() {
-  String message = "SLOTS:";
-  message += analogRead(LDR1) > 1000 ? "1" : "0";
-  message += analogRead(LDR2) > 1000 ? "1" : "0";
-  message += analogRead(LDR3) > 1000 ? "1" : "0";
-  message += analogRead(LDR4) > 1000 ? "1" : "0";
-  ws.textAll(message);
-}
+// Web server on port 80
+WebServer server(80);
 
 void setup() {
   Serial.begin(115200);
-  WiFi.begin(ssid, password);
 
+  // Start I2C for LCD
+  Wire.begin(21, 22); // SDA, SCL
+  lcd.init();
+  lcd.backlight();
+
+  // Setup LDR pins
+  pinMode(ldr1DigitalPin, INPUT);
+  pinMode(ldr2DigitalPin, INPUT);
+  pinMode(ldr3DigitalPin, INPUT);
+  pinMode(ldr4DigitalPin, INPUT);
+
+  // Display connecting message on LCD
+  lcd.setCursor(0, 0);
+  lcd.print("Connecting to WiFi");
+  
+  // Connect to WiFi
+  WiFi.begin(ssid, password);
+  Serial.print("Connecting to WiFi");
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
     Serial.print(".");
   }
-  Serial.println("\nConnected to WiFi");
+  
+  // WiFi connected
+  Serial.println("\nWiFi connected! IP address: ");
+  Serial.println(WiFi.localIP());
 
-  SPI.begin();
-  mfrc522.PCD_Init();
+  // Clear the LCD and display the IP address
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("WiFi Connected");
+  lcd.setCursor(0, 1);
+  lcd.print(WiFi.localIP().toString()); // Display IP address
 
-  gateServo.attach(SERVO_PIN);
-  gateServo.write(0);
+  // Define endpoint
+  server.on("/status", HTTP_GET, []() {
+    int ldr1 = analogRead(ldr1DigitalPin) > threshold ? HIGH : LOW;
+    int ldr2 = analogRead(ldr2DigitalPin) > threshold ? HIGH : LOW;
+    int ldr3 = analogRead(ldr3DigitalPin) > threshold ? HIGH : LOW;
+    int ldr4 = analogRead(ldr4DigitalPin) > threshold ? HIGH : LOW;
 
-  ws.onEvent([](AsyncWebSocket *server, AsyncWebSocketClient *client,
-                AwsEventType type, void *arg, uint8_t *data, size_t len) {
-    if (type == WS_EVT_CONNECT) {
-      Serial.println("WebSocket client connected");
-    }
+    String data = String(ldr1 == HIGH ? 1 : 0) + "," +
+                  String(ldr2 == HIGH ? 1 : 0) + "," +
+                  String(ldr3 == HIGH ? 1 : 0) + "," +
+                  String(ldr4 == HIGH ? 1 : 0);
+
+    server.send(200, "text/plain", data);
   });
-  server.addHandler(&ws);
+
   server.begin();
 }
 
 void loop() {
-  if (mfrc522.PICC_IsNewCardPresent() &&
-      mfrc522.PICC_ReadCardSerial()) {
-    if (checkUID(mfrc522.uid) && slotAvailable()) {
-      Serial.println("Access granted. Opening gate...");
-      openGate();
-      sendSlotStatus();
-    } else {
-      Serial.println("Access denied or no free slot.");
-    }
-    mfrc522.PICC_HaltA();
-    mfrc522.PCD_StopCrypto1();
-  }
+  server.handleClient();
 
-  delay(100);
+  // Read LDR values
+  int ldr1Value = analogRead(ldr1DigitalPin);
+  int ldr2Value = analogRead(ldr2DigitalPin);
+  int ldr3Value = analogRead(ldr3DigitalPin);
+  int ldr4Value = analogRead(ldr4DigitalPin);
+
+  // Convert to digital state
+  int ldr1State = (ldr1Value > threshold) ? HIGH : LOW;
+  int ldr2State = (ldr2Value > threshold) ? HIGH : LOW;
+  int ldr3State = (ldr3Value > threshold) ? HIGH : LOW;
+  int ldr4State = (ldr4Value > threshold) ? HIGH : LOW;
+
+  // Display LDR states on LCD
+  lcd.setCursor(0, 0);
+  lcd.print("P1:");
+  lcd.print(ldr1State == HIGH ? "1" : "0");
+  lcd.print(" P2:");
+  lcd.print(ldr2State == HIGH ? "1" : "0");
+
+  lcd.setCursor(0, 1);
+  lcd.print("P3:");
+  lcd.print(ldr3State == HIGH ? "1" : "0");
+  lcd.print(" P4:");
+  lcd.print(ldr4State == HIGH ? "1" : "0");
+
+  // Print LDR states to Serial Monitor
+  Serial.print("LDR States: P1=");
+  Serial.print(ldr1State == HIGH ? "1" : "0");
+  Serial.print(", P2=");
+  Serial.print(ldr2State == HIGH ? "1" : "0");
+  Serial.print(", P3=");
+  Serial.print(ldr3State == HIGH ? "1" : "0");
+  Serial.print(", P4=");
+  Serial.println(ldr4State == HIGH ? "1" : "0");
+
+  delay(1000);
 }
-
