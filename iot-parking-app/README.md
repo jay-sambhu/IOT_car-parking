@@ -1,50 +1,184 @@
-# Welcome to your Expo app 👋
+# IoT Car Parking Mobile App
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A React Native mobile application built with Expo for monitoring car parking spaces in real-time.
 
-## Get started
+## Features
 
-1. Install dependencies
+- Real-time parking space monitoring
+- Cross-platform (iOS and Android)
+- Modern UI with React Navigation
+- WebSocket integration for live updates
+- Integration with IoT backend server
 
+## Prerequisites
+
+Before running this app, ensure you have:
+
+- Node.js (v16 or higher)
+- npm or yarn package manager
+- Expo CLI (install with `npm install -g @expo/cli`)
+- Expo Go app on your mobile device (for testing)
+
+## Quick Start
+
+### 1. Install Dependencies
+
+```bash
+npm install
+```
+
+### 2. Install Expo CLI (if not already installed)
+
+```bash
+npm install -g @expo/cli
+```
+
+### 3. Start Development Server
+
+```bash
+npx expo start
+```
+
+### 4. Run on Device/Simulator
+
+After starting the development server, you can:
+
+- **Physical Device**: Open Expo Go app and scan the QR code
+- **iOS Simulator**: Press 'i' in the terminal (requires Xcode)
+- **Android Emulator**: Press 'a' in the terminal (requires Android Studio)
+- **Web Browser**: Press 'w' in the terminal
+
+## Project Structure
+
+```
+iot-parking-app/
+├── app/                    # Main app screens (Expo Router)
+│   ├── (tabs)/            # Tab-based navigation
+│   ├── +not-found.tsx     # 404 page
+│   └── _layout.tsx        # Root layout
+├── components/            # Reusable UI components
+├── constants/             # App constants
+├── hooks/                 # Custom React hooks
+├── assets/               # Images, fonts, etc.
+└── package.json          # Dependencies and scripts
+```
+
+## Available Scripts
+
+- `npm start` - Start Expo development server
+- `npm run android` - Open on Android emulator
+- `npm run ios` - Open on iOS simulator
+- `npm run web` - Open in web browser
+- `npm run lint` - Run ESLint code analysis
+- `npm run reset-project` - Reset to blank project
+
+## Configuration
+
+### Backend Integration
+
+To connect the mobile app to your IoT backend:
+
+1. Update the backend server URL in your app configuration
+2. Ensure CORS is enabled on the backend (already configured)
+3. Configure WebSocket connection for real-time updates
+
+### Customization
+
+You can customize the app by:
+
+- Modifying screens in the `app/` directory
+- Creating new components in `components/`
+- Updating styling and themes in `constants/`
+- Adding new navigation routes
+
+## Development Workflow
+
+### For Training and Learning:
+
+1. **Start with Basic Setup**:
+   - Understand Expo project structure
+   - Learn React Native basics
+   - Practice with component creation
+
+2. **Add IoT Integration**:
+   - Implement HTTP requests to backend
+   - Add WebSocket for real-time data
+   - Handle parking status display
+
+3. **UI/UX Development**:
+   - Design parking lot visualization
+   - Add status indicators
+   - Implement navigation
+
+4. **Testing and Deployment**:
+   - Test on multiple devices
+   - Handle different screen sizes
+   - Prepare for app store deployment
+
+## Troubleshooting
+
+### Common Issues:
+
+1. **Expo CLI Not Found**:
    ```bash
+   npm install -g @expo/cli
+   ```
+
+2. **Metro Bundler Issues**:
+   ```bash
+   npx expo start --clear
+   ```
+
+3. **Network Connection Problems**:
+   - Ensure mobile device and computer are on same WiFi
+   - Check firewall settings
+   - Try using tunnel mode: `npx expo start --tunnel`
+
+4. **Package Installation Errors**:
+   ```bash
+   rm -rf node_modules package-lock.json
    npm install
    ```
 
-2. Start the app
+## Technologies Used
 
-   ```bash
-   npx expo start
-   ```
+- **React Native**: Cross-platform mobile development
+- **Expo**: Development platform and toolchain
+- **React Navigation**: Navigation and routing
+- **TypeScript**: Type-safe JavaScript
+- **ESLint**: Code quality and consistency
 
-In the output, you'll find options to open the app in a
+## Backend Integration
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+This mobile app is designed to work with the IoT Car Parking backend server. Make sure to:
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+1. Start the backend server first
+2. Update API endpoints in the app configuration
+3. Ensure both devices are on the same network
 
-## Get a fresh project
+## Contributing
 
-When you're ready, run:
+When working on this training project:
 
-```bash
-npm run reset-project
-```
+1. Follow React Native best practices
+2. Use TypeScript for type safety
+3. Test on both iOS and Android
+4. Document any new features or changes
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+## Deployment
 
-## Learn more
+### For Development:
+- Use Expo Go for quick testing
+- Share with team using Expo sharing features
 
-To learn more about developing your project with Expo, look at the following resources:
+### For Production:
+- Build standalone apps using `eas build`
+- Distribute through App Store/Google Play
+- Consider using Expo Application Services (EAS)
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+## Learn More
 
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+- [Expo Documentation](https://docs.expo.dev/)
+- [React Native Documentation](https://reactnative.dev/)
+- [React Navigation](https://reactnavigation.org/)
+- [TypeScript with React Native](https://reactnative.dev/docs/typescript)
